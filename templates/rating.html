@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Your Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-roboto">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Rate Your Orders</h1>
+        
+        <!-- Verification Code Input -->
+        <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
+            <label for="verificationCode" class="block text-sm font-medium text-gray-700">Verification Code</label>
+            <input type="text" id="verificationCode" class="mt-1 block w-full max-w-xs border-gray-300 rounded-md shadow-sm p-2">
+            <button onclick="fetchOrders()" class="mt-2 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">Submit</button>
+        </div>
+
+        <!-- Orders List -->
+        <div id="orders" class="space-y-6"></div>
+    </div>
+
+    <script>
+        async function fetchOrders() {
+            const code = document.getElementById('verificationCode').value.trim();
+            if (!code) {
+                alert('Please enter a verification code');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get_delivered_orders_by_code?code=${encodeURIComponent(code)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(`Error: ${result.error || 'Failed to fetch orders'}`);
+                    return;
+                }
+
+                const orders = result.orders;
+                if (orders.length === 0) {
+                    alert('No delivered orders found for this verification code');
+                    return;
+                }
+
+                const ordersDiv = document.getElementById('orders');
+                ordersDiv.innerHTML = '';
+
+                orders.forEach(order => {
+                    const items = order.items || [];
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'bg-white p-4 rounded-lg shadow-md';
+                    orderDiv.innerHTML = `
+                        <h2 class="text-lg font-semibold text-gray-800">Order #${order.timestamp}</h2>
+                        <p class="text-gray-600">Delivered: ${new Date(order.delivery_timestamp).toLocaleString()}</p>
+                        <h3 class="text-md font-medium mt-2">Items:</h3>
+                    `;
+
+                    const itemsList = document.createElement('ul');
+                    itemsList.className = 'space-y-4';
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center p-4 bg-gray-50 rounded-md';
+                        li.innerHTML = `
+                            <span class="text-base text-gray-700">${item.name} - $${Number(item.price).toFixed(2)}</span>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-lg font-medium text-gray-800">Rating: ${item.rating_count > 0 ? item.average_rating.toFixed(1) + ' (' + item.rating_count + ' ratings)' : 'New (0 ratings)'}</span>
+                                <div class="star-rating" data-order-id="${order.timestamp}" data-food-name="${item.name}"></div>
+                            </div>
+                        `;
+                        itemsList.appendChild(li);
+                    });
+
+                    orderDiv.appendChild(itemsList);
+                    ordersDiv.appendChild(orderDiv);
+                });
+
+                // Initialize star ratings
+                document.querySelectorAll('.star-rating').forEach(container => {
+                    const orderId = container.dataset.orderId;
+                    const foodName = container.dataset.foodName;
+                    for (let i = 1; i <= 5; i++) {
+                        const star = document.createElement('span');
+                        star.className = 'star text-2xl cursor-pointer text-gray-400 hover:text-yellow-400';
+                        star.innerHTML = '☆';
+                        star.dataset.rating = i;
+                        star.addEventListener('click', () => {
+                            submitRating(orderId, foodName, i);
+                            // Highlight selected stars
+                            container.querySelectorAll('.star').forEach(s => {
+                                s.innerHTML = s.dataset.rating <= i ? '★' : '☆';
+                                s.className = s.dataset.rating <= i ? 'star text-2xl cursor-pointer text-yellow-500' : 'star text-2xl cursor-pointer text-gray-400 hover:text-yellow-400';
+                            });
+                        });
+                        container.appendChild(star);
+                    }
+                });
+            } catch (error) {
+                alert('Error fetching orders: ' + error.message);
+            }
+        }
+
+        async function submitRating(orderId, foodName, rating) {
+            if (!rating || rating < 1 || rating > 5) {
+                alert('Please select a valid rating between 1 and 5');
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit_rating', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `food_name=${encodeURIComponent(foodName)}&rating=${rating}`
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Rating submitted successfully!');
+                    fetchOrders(); // Refresh orders list
+                } else {
+                    alert(`Error: ${result.error || 'Failed to submit rating'}`);
+                }
+            } catch (error) {
+                alert('Error submitting rating: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

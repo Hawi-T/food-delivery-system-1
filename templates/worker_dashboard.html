@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body id="worker-dashboard">
+    <h1>Worker Dashboard - <span>{{ worker }}</span></h1>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    
+    <h2>Pending Orders</h2>
+    <div id="pending-orders">
+        <p>Loading orders...</p>
+    </div>
+    
+    <script src="{{ url_for('static', filename='worker.js') }}"></script>
+</body>
+</html>

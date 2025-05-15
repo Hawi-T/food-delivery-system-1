@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Admin Dashboard - <span>{{ admin }}</span></h1>
+    <a href="{{ url_for('admin_logout') }}" id="log_out">Logout</a>
+    
+    <h2>Add New Worker</h2>
+    <form id="add-worker-form">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" placeholder="Username" required minlength="3">
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" placeholder="Password (min 8 chars)" required minlength="8">
+        <button type="submit">Add Worker</button>
+    </form>
+    <p id="worker-error" style="color: red; display: none;"></p>
+
+    <h2>Pending Orders</h2>
+    <div id="pending-orders">
+        <p>Loading orders...</p>
+    </div>
+
+    <h2>Delivered Orders</h2>
+    <div id="delivered-orders">
+        <p>Loading orders...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

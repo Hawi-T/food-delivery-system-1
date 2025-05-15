@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-roboto">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Food Delivery Menu</h1>
+        {% if error %}
+            <p class="text-red-500 mb-4">{{ error }}</p>
+        {% endif %}
+        
+        <!-- Rating Page Button -->
+        <div class="mb-6">
+            <a href="{{ url_for('rating') }}" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">Rate Your Orders</a>
+        </div>
+
+        <div id="menu" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in menu %}
+            <div class="menu-item bg-white p-4 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-gray-800">{{ item.Name | e }}</h3>
+                <p class="text-gray-600">{{ item.Description | e }}</p>
+                <p class="text-gray-700 font-medium">Price: {{ item.Price | float | round(2) }} Birr</p>
+                <p class="text-gray-700">
+                    <span class="font-medium">Rating: </span>
+                    {% if item.rating_count > 0 %}
+                        {{ item.average_rating | float | round(1) }} ({{ item.rating_count }} ratings)
+                    {% else %}
+                        New (0 ratings)
+                    {% endif %}
+                </p>
+                <button data-name="{{ item.Name | e }}" data-price="{{ item.Price | float }}" class="add-to-cart bg-green-500 text-white font-semibold py-2 px-4 rounded-lg mt-2 hover:bg-green-600 transition duration-200">Add to Cart</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">Your Order</h2>
+        <div id="cart" class="bg-white p-4 rounded-lg shadow-md"></div>
+        
+        <form id="order-form" class="mt-6 bg-white p-4 rounded-lg shadow-md">
+            <div class="mb-4">
+                <label for="customer_name" class="block text-gray-700 font-medium">Name:</label>
+                <input type="text" name="customer_name" id="customer_name" placeholder="Full Name" required minlength="2" class="w-full border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div class="mb-4">
+                <label for="address" class="block text-gray-700 font-medium">Address:</label>
+                <input type="text" name="address" id="address" placeholder="Delivery Address" required minlength="5" class="w-full border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div class="mb-4">
+                <label for="contact" class="block text-gray-700 font-medium">Contact:</label>
+                <input type="text" name="contact" id="contact" placeholder="Phone Number" required pattern="[0-9]{9,15}" class="w-full border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">Place Order</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+</body>
+</html>

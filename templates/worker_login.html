@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Worker Login</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    
+    <form method="POST" action="{{ url_for('worker_login') }}">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" placeholder="Username" required minlength="3">
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" placeholder="Password" required minlength="8">
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
